@@ -22,3 +22,6 @@ A sample project for django reset framework
 
 5. 运行项目
 	python manage.py runserver 0.0.0.0:8000
+
+访问网站：
+	在浏览器中访问：http://127.0.0.1:8000/
