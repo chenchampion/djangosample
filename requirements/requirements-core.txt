@@ -3,3 +3,5 @@ Django==1.10
 djangorestframework
 djangorestframework-jwt
 django-cors-headers
+django-rest-auth
+django-allauth

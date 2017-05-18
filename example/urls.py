@@ -19,7 +19,6 @@ from rest_framework import routers, serializers, viewsets
 from django.contrib import admin
 from retail.views import *
 from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token, refresh_jwt_token
-
 # Serializers define the API representation.
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -48,7 +47,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
+#router.register(r'users', UserViewSet)
 router.register(prefix='chains', viewset=ChainViewSet)
 router.register(prefix='stores', viewset=StoreViewSet)
 router.register(prefix='employees', viewset=EmployeeViewSet)
@@ -58,8 +57,10 @@ router.register(prefix='employees', viewset=EmployeeViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api-token-auth/', obtain_jwt_token),
-    url(r'^api-token-refresh/', refresh_jwt_token),
-    url(r'^api-token-verify/', verify_jwt_token),
+    #url(r'^api-token-auth/', obtain_jwt_token),
+    #url(r'^api-token-refresh/', refresh_jwt_token),
+    #url(r'^api-token-verify/', verify_jwt_token),
+    url(r'^rest-auth/', include('rest_auth.urls')),
+    url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
+
 ]
