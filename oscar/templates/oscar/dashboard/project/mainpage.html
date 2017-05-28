@@ -1,0 +1,84 @@
+{% extends 'dashboard/layout.html' %}
+{% load sorting_tags %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+{% load currency_filters %}
+
+{% block body_class %}{{ block.super }} create-page partners{% endblock %}
+{% block title %}
+    {{ partner.name }} | {% trans "Partners" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li class="active">项目主页</li>
+    </ul>
+{% endblock %}
+
+{% block headertext %}
+    项目主页
+{% endblock %}
+
+{% block dashboard_content %}
+
+    {% block order_contents %}
+        {% if subs %}
+            <h3>项目列表</h3>
+            <table class="table table-striped table-bordered">
+                <tr>
+                    <th>项目名称</th>
+                    <th>启动日期</th>
+                    <th>负责人</th>
+                    <th>完成状态？</th>
+                </tr>
+                {% for sub in subs %}
+                    <tr>
+                        <td><a href="{{sub.project.get_absolute_url}}">{{sub.project.name}}</a></td>
+                        <td>{{sub.project.start_date|date}}</td>
+                        <td>{{sub.project.owner}}</td>
+                        <td>
+                            <div class="floatform">
+				                <form action="." method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="projectid" value="{{sub.project.id}}" />
+                                    {% if sub.project.is_active %}
+                                        <input type="hidden" name="activestatus" value="true" />
+                                        <input type="checkbox" name="inactivate" value="" onchange="submit()" checked="checked" class="projstatus" />
+                                    {% else %}
+                                        <input type="hidden" name="activestatus" value="false" />
+                                        <input type="checkbox" name="activate" value="" onchange="submit()" class="projstatus" />
+                                    {% endif %}
+                                </form>
+				            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% include "partials/pagination.html" %}
+        {% else %}
+            {% if searchform.is_bound %}
+                <p>{% trans "No orders match your search." %}</p>
+            {% else %}
+                <p>{% trans "You haven't placed any orders." %}</p>
+            {% endif %}
+        {% endif %}
+    {% endblock order_contents %}
+
+    {% block project_creation %}
+        <h3>创建新的项目</h3>
+            <div class="well">
+                <form action="." method="get" class="form-horizontal">
+                    {% include "partials/form_fields.html" with form=form style='horizontal' %}
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-sm-8">
+                            <button name="createproject" type="submit" class="btn btn-primary" data-loading-text="{% trans 'Saving...' %}">{% trans "Save" %}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+    {% endblock project_creation %}
+
+{% endblock dashboard_content %}

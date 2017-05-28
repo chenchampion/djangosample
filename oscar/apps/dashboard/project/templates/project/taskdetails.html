@@ -1,0 +1,225 @@
+{% extends 'project/base.html' %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+    </li>
+    <li>
+        <a href="{% url 'dashboard:project-index' %}">项目主页</a>
+    </li>
+    <li>
+        <a href="{{project.get_absolute_url}}">项目详细</a>
+    </li>
+    <li class="active">任务详细</li>
+</ul>
+{% endblock %}
+
+{% block title %}
+{{block.super}} - Details for {{task.name}}
+{% endblock %}
+
+
+
+{% block jqueryarea %}
+<script type="text/javascript" src="/static/js/taskdetails.js">
+
+ </script>
+{% endblock %}
+
+{% block innercontent %}
+    <h2>{{task.name}}</h2>
+				<div class="tblpad">
+	<div class="curve"><p></p></div>						
+  <div class="taskinfo">
+	
+   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbltitle">
+  <tr>
+    <td width="16%" style="padding-left:30px;">Task Name</td>
+    <td width="13%" style=" text-align:left" >Expected Start Due</td>
+    <td width="13%" style=" text-align:left">Expected End Date</td>
+    <td width="13%" style=" text-align:left">User Responsible</td>
+	<td width="6%" style=" text-align:left">Edit</td>
+    <td width="13%" style=" text-align:left" >Actual Start Due</td>
+    <td width="13%" style=" text-align:left">Actual End Date</td>
+    <td width="13%" style=" text-align:left">Linked Order</td>
+  </tr>
+   </table>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl">
+ 	    <tbody>
+            <tr>
+                <td width="16%">{{task.name}}</td>
+                <td width="13%" >{{task.expected_start_date|date}}</td>
+                <td width="13%" >{{task.expected_end_date|date}}</td>
+                <td width="13%" >{{task.user_responsible}}</td>
+                <td width="6%" ><a href="{{task.edit_url}}">Edit</a></td>
+                <td width="13%" >{{task.actual_start_date|date}}</td>
+                <td width="13%" >{{task.actual_end_date|date}}</td>
+
+                <td width="13%" >
+                    {%if task.order%}
+                    <a href="{% url 'customer:order' order_number=task.order.number %}">{{task.order.number}}</a>
+                    {%endif%}
+                </td>
+
+            </tr>
+	    </tbody>
+    </table>
+    </div>
+    {% if company %}
+        <p></p>
+
+             <div class="form-group">
+                {%if task.order%}
+                 <a class="btn btn-info" href="{% url 'dashboard:task-order-unlink' task_pk=task.id order_pk=task.order.id %}" method="post" >取消订单连接</a>
+
+                {%endif%}
+                    <a class="btn btn-info" href="{% url 'dashboard:task-order-select' project_name=project.shortname task_num=task.number %}" >关联一个现有的订单</a>
+             </div>
+     {%endif%}
+		</div>
+    
+    <div id="taskdetails">
+    
+        <div id="notes">
+        {% if task.get_notes %}
+        <h3>Notes</h3>
+        <ul>
+        {% for note in task.get_notes %}
+            <li>{{note.text}} added by {{note.user.username}}</li>
+        {% endfor %}
+        </ul>
+        {% else %}
+        No notes on this task.
+        {% endif %}
+    </div>
+	
+    {% if task.num_child_tasks %}
+    <div id="subtasks">
+	<h3>Subs tasks for {{task.name}}</h3>
+	<table>
+            <thead>
+                <tr>
+                    <td>Subtask</td>
+                    <td>Start Date</td>
+                    <td>End Date</td>
+                    <td>Responsible</td>
+                    <td>Details</td>
+                    <td>Edit</td>
+                    <td>Complete?</td>
+                    <td>Delete</td>
+                </tr>
+            </thead>
+        
+	{% for task in task.task_set.all %}
+        <tbody>
+	    {% include 'project/taskrow.html' %}
+        </tbody>
+	{% endfor %}
+        
+	</table>
+    </div>
+    {% endif %}
+    
+    {% if task.num_items %}
+    <div id="taskitems">
+	<h3>Items for {{task.name}}</h3>
+        <table>
+        <thead>
+            <tr>
+                <td>
+                    Item
+                </td>
+                <td>
+                    User
+                </td>
+                <td>
+                    Time
+                </td>
+                <td>
+                    Complete?
+                </td>
+            </tr>
+        </thead>
+	{% for item in task.taskitem_set.all %}
+	    <tbody>
+            <tr class={% cycle "odd" "even" %}>
+	    <td><a href="{{item.edit_url}}">{{item.name}}</a></td>
+            <td>{{item.user}}</td>
+            <td>{{item.time_worked}}</td>
+            {% include 'project/taskitem_done.html' %}
+            </tr>
+	    </tbody>
+	{% endfor %}
+	</table>
+    </div>
+    {% endif %}
+    </div>
+{% endblock %}
+
+{% block formsarea %}
+
+      {%if task.parent_task_num%}
+        {%else%}
+  <div class="genericform">
+
+					<h3>Add a sub task</h3>	  
+		<div class="createcontent">
+	  <div id="subtaskform">
+	<form action="." method="post">
+        {% csrf_token %}
+	{{addsubtaskform.as_p}}
+	<input type="SUBMIT" name="addsubtask" value="Add a subtask" class="submitbutton" />
+	</form>
+	</div>
+  </div>
+	</div>
+  {% endif %}
+
+  <div class="genericform">     
+		<h3>Add a note</h3>
+				<div class="createcontent">		
+    <div id="noteform">
+        <form action="." method="post">
+            {% csrf_token %}
+            {{noteform.as_p}}
+            <input type="submit" name="addnote" value="Add Note" class="submitbutton" />
+        </form>
+				</div>
+    </div>
+  </div>
+	    
+
+{% endblock %}
+
+{% block sidebar %}
+<h3>Actions</h3>
+<ul>
+    {%if task.parent_task_num%}
+    {%else%}
+    <li><a href="#tasks" id="taskformshow">Add a task.</a></li>
+    {%endif%}
+    <li><a href="#notes" id="shownotes">Show notes</a></li>
+    <li><a href="#shownotesform" id="shownotesform">Add a note</a></li>
+</ul>
+
+<h3>Meta</h3>
+<p class="sideblurb">You are looking at {{task.name}}, a task for {{project.name}}.<p>
+<ul> 
+    <li><a href="{{task.edit_url}}">Edit this task</a></li>
+    <li><a href="{{task.version_url}}">See previous versions</a></li>
+</ul>
+
+<h3>
+    Older Versions
+</h3>
+
+{% include 'project/taskversions.html' %}
+<p>
+ Task {{task.name}} was created on {{task.created_on|date}}. It has {{task.num_child_tasks}} sub tasks and {{task.num_items}} task items.
+ {% if task.expected_end_date %}
+    You need to complete this by {{task.expected_end_date|date}}
+ {% endif %}
+</p>
+{% endblock %}

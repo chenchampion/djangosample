@@ -1,3 +1,4 @@
+#coding:utf-8
 """
 Django settings for example project.
 
@@ -12,6 +13,15 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import datetime
+import environ
+import oscar
+
+env = environ.Env()
+
+abspath = lambda *p: os.path.abspath(os.path.join(*p))
+
+PROJECT_ROOT = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -33,7 +43,7 @@ SITE_ID = 1
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,17 +53,26 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'django.contrib.sites',
+    'django.contrib.flatpages',
+    'core',
+    'floppyforms',
+    'widget_tweaks',
     'allauth',
     'allauth.account',
     'rest_auth.registration',
     'corsheaders',
     'example',
     'retail',
-
-
-
+    'swingtime',
+    'mymoney',
+    'mymoney.mymoneycore',
+    'mymoney.apps.bankaccounts',
+    'mymoney.apps.banktransactiontags',
+    'mymoney.apps.banktransactions',
+    'mymoney.apps.banktransactionschedulers',
+    'mymoney.apps.banktransactionanalytics',
     'rest_auth',
-)
+]  + oscar.get_core_apps()
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -65,6 +84,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+
+    # Ensure a valid basket is added to the request instance for every request
+    'oscar.apps.basket.middleware.BasketMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 
 ROOT_URLCONF = 'example.urls'
@@ -72,7 +95,7 @@ ROOT_URLCONF = 'example.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [oscar.OSCAR_MAIN_TEMPLATE_DIR,],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,6 +103,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                # Oscar specific
+                'oscar.apps.search.context_processors.search_form',
+                'oscar.apps.customer.notifications.context_processors.notifications',
+                'oscar.apps.promotions.context_processors.promotions',
+                'oscar.apps.checkout.context_processors.checkout',
+                'oscar.core.context_processors.metadata',
             ],
         },
     },
@@ -139,9 +169,146 @@ REST_FRAMEWORK = {
 
 JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=2592000)
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 REST_USE_JWT=True
 
+#oscar
+
+# Path helper
+location = lambda x: os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), x)
+
+# Haystack settings
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': location('whoosh_index'),
+    },
+}
+
+# ==============
+# Oscar settings
+# ==============
+
+from oscar.defaults import *
+
+# Add Oscar's custom auth backend so users can sign in using their email
+# address.
+AUTHENTICATION_BACKENDS = (
+    'oscar.apps.customer.auth_backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+AUTH_USER_MODEL = 'core.CustomUser'
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME':
+        'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 9,
+        }
+    }
+]
+
+# Meta
+# ====
+
+OSCAR_SHOP_TAGLINE = 'Test'
+
+OSCAR_RECENTLY_VIEWED_PRODUCTS = 20
+OSCAR_ALLOW_ANON_CHECKOUT = True
+
+# This is added to each template context by the core context processor.  It is
+# useful for test/stage/qa sites where you want to show the version of the site
+# in the page title.
+DISPLAY_VERSION = False
+
+
+# Order processing
+# ================
+
+# Sample order/line status settings. This is quite simplistic. It's like you'll
+# want to override the set_status method on the order object to do more
+# sophisticated things.
+OSCAR_INITIAL_ORDER_STATUS = 'Pending'
+OSCAR_INITIAL_LINE_STATUS = 'Pending'
+
+# This dict defines the new order statuses than an order can move to
+OSCAR_ORDER_STATUS_PIPELINE = {
+    'Pending': ('Being processed', 'Cancelled',),
+    'Being processed': ('Complete', 'Cancelled',),
+    'Cancelled': (),
+    'Complete': (),
+}
+
+# This dict defines the line statuses that will be set when an order's status
+# is changed
+OSCAR_ORDER_STATUS_CASCADE = {
+    'Being processed': 'Being processed',
+    'Cancelled': 'Cancelled',
+    'Complete': 'Shipped',
+}
+
+OSCAR_LINE_STATUS_PIPELINE = {
+    'selectcolor': "选漆",
+    'makemorsk' : '制模',
+}
+# LESS/CSS
+# ========
+
+# We default to using CSS files, rather than the LESS files that generate them.
+# If you want to develop Oscar's CSS, then set USE_LESS=True to enable the
+# on-the-fly less processor.
+USE_LESS = False
+
+
+# Sentry
+# ======
+
+if env('SENTRY_DSN', default=None):
+    RAVEN_CONFIG = {'dsn': env('SENTRY_DSN', default=None)}
+    LOGGING['handlers']['sentry'] = {
+        'level': 'ERROR',
+        'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+    }
+    LOGGING['root']['handlers'].append('sentry')
+    INSTALLED_APPS.append('raven.contrib.django.raven_compat')
+
+
+# Sorl
+# ====
+
+THUMBNAIL_DEBUG = DEBUG
+THUMBNAIL_KEY_PREFIX = 'oscar-sandbox'
+THUMBNAIL_KVSTORE = env(
+    'THUMBNAIL_KVSTORE',
+    default='sorl.thumbnail.kvstores.cached_db_kvstore.KVStore')
+THUMBNAIL_REDIS_URL = env('THUMBNAIL_REDIS_URL', default=None)
+
+
+# Django 1.6 has switched to JSON serializing for security reasons, but it does not
+# serialize Models. We should resolve this by extending the
+# django/core/serializers/json.Serializer to have the `dumps` function. Also
+# in tests/config.py
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
+MYMONEY = {
+    'ADMIN_BASE_URL': 'admin',
+    # Just to force default values. See l10n.dist for more details.
+    'USE_L10N_DIST': False,
+    'BOOTSTRAP_CALENDAR_LANGCODE': '',
+    'BOOTSTRAP_DATEPICKER_LANGCODE': '',
+}
+
+
+# Try and import local settings which can be used to override any of the above.
+
+try:
+    from local_settings import *  # noqa
+except ImportError:
+    pass

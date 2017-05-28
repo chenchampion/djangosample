@@ -1,0 +1,36 @@
+{% extends 'dashboard/layout.html' %}
+{% load sorting_tags %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+
+{% block body_class %}{{ block.super }} create-page investors{% endblock %}
+{% block title %}
+    {{ investor.name }} | {% trans "Investors" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li>
+            <a href="{% url 'dashboard:investor-list' %}">{% trans "Investors" %}</a>
+        </li>
+        <li class="active">{{ investor.name }}</li>
+    </ul>
+{% endblock %}
+
+{% block headertext %}{{ investor.name }}{% endblock %}
+
+{% block dashboard_content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-header">
+                <h2>{{ title }}</h2>
+            </div>
+            {% include "dashboard/partials/form.html" with form=form class="well" %}
+        </div>
+    </div>
+
+{% endblock dashboard_content %}

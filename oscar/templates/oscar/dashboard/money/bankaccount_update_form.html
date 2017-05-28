@@ -1,0 +1,36 @@
+{% extends 'dashboard/layout.html' %}
+{% load sorting_tags %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+{% load currency_filters %}
+
+{% block body_class %}{{ block.super }} create-page companys{% endblock %}
+{% block title %}
+    {{ company.name }} | {% trans "Companys" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li>
+            <a href="{% url 'dashboard:company-list' %}">{% trans "Companys" %}</a>
+        </li>
+        <li class="active">{{ object.project.name }}</li>
+    </ul>
+{% endblock %}
+
+{% block headertext %}{{ object.project.name }}{% endblock %}
+
+{% block dashboard_content %}
+
+<form action="" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <div class="btn-group" role="group">
+        <input class="btn btn-success" type="submit" value="{% trans "Update" %}" />
+        <a href="{% url 'dashboard:mymoney-delete' object.pk %}" class="btn btn-danger">{% trans "Delete" %}</a>
+    </div>
+</form>
+
+{% endblock dashboard_content %}

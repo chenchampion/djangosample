@@ -1,0 +1,5 @@
+{% load i18n %}
+{% blocktrans %}
+User {{ user_name }} was unlinked from {{ investor_name }}.
+{% endblocktrans %}
+<a href="{% url 'dashboard:investor-user-link' investor_pk=investor_pk user_pk=user_pk %}">{% trans 'Undo' %}.</a>

@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+
+{% load vendor_products_tags %}
+{% load currency_filters %}
+{% load reviews_tags %}
+{% load staticfiles %}
+{% load product_tags %}
+{% load display_tags %}
+{% load i18n %}
+{% load purchase_info_tags %}
+
+{% block title %}
+    {{ product.title }} | {{ block.super }}
+{% endblock %}
+
+{% block description %}
+    {{ product.description|default:""|striptags }}
+{% endblock %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{{ homepage_url }}">{% trans "Home" %}</a>
+    </li>
+    <li>
+        <a href="{% url 'partner:index' %}">所有供应商</a>
+    </li>
+    <li>
+        <a href="{{ partner.get_absolute_url }}">{{ partner.name }}</a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block header %}
+{% endblock header %}
+
+{% block content %}
+
+<article class="product_page"><!-- Start of product page -->
+
+    {% block product_info %}
+    <div class="sub-header">
+        <h2>供应商信息</h2>
+    </div>
+    <table class="table table-striped">
+        {% if partner.name %}
+        <tr>
+            <th>供应商名称</th><td>{{ partner.name }}</td>
+        </tr>
+        {% endif %}
+
+        {% if partner.addresses %}
+        <tr>
+            <th>地址</th>
+            <td>
+                {% for address in partner.addresses.all %}
+                    <li> {{address}} </li>
+                {% endfor %}
+
+            </td>
+        </tr>
+        {% endif %}
+
+    </table>
+    {% endblock %}
+
+    <div class="row">
+
+        {% block product_gallery %}
+        <div class="col-sm-6">
+            {% include "catalogue/partials/gallery.html" %}
+        </div>
+        {% endblock %}
+
+    </div><!-- /row -->
+
+    {% block product_description %}
+        {% if partner.description %}
+        <div id="product_description" class="sub-header">
+            <h2>供应商介绍</h2>
+        </div>
+        <p>{{ partner.description|safe }}</p>
+        {% endif %}
+    {% endblock %}
+
+
+
+    {% recently_viewed_products current_partner=partner %}
+
+</article><!-- End of product page -->
+{% endblock content %}
+
+{% block extrascripts %}
+    {{ block.super }}
+{% endblock %}

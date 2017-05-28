@@ -1,0 +1,81 @@
+  <tr class="{% cycle "" "tdbggrey" %} taskrow">
+    <td width="17%" class="projectname1"  >
+		<a href="{{parent_task.parent.get_absolute_url}}">{{parent_task.parent.name}}</a>
+		</td>
+    <td width="17%" class="projectname1"  >
+		<a></a>
+		</td>
+    <td width="14%">
+		 {{parent_task.parent.expected_start_date|date}}
+		 </td>
+    <td width="14%">
+		{{parent_task.parent.expected_end_date|date}}
+		</td>
+	  <td width="14%">
+		 {{parent_task.parent.user_responsible}}
+		 </td>
+	<td width="7%" >
+					<a href="{{parent_task.parent.edit_url}}">
+                <img src="/static/images/edit.png" alt="edit" />
+                
+            </a>
+	</td>
+    <td width="7%" >
+		<form action="." method="post" id="markdone-{{parent_task.parent.id}}" class="markdone">
+			{% csrf_token %}
+		<div>
+            {% if parent_task.parent.is_complete %}
+                <input type="hidden" name="taskid" value="{{parent_task.parent.id}}" />
+		<input type="hidden" name="markundone" value="markundone" />
+		<input type="checkbox" name="markundone_check" value="{{parent_task.parent.is_complete}}" checked="checked" onclick="this.form.submit();" />
+            
+            {% else %}
+                <input type="hidden" name="taskid" value="{{parent_task.parent.id}}" />
+		<input type="checkbox" name="markdone" value="{{parent_task.parent.is_complete}}" onclick="this.form.submit();"/>
+            {% endif %}
+		</div>
+    </form> 
+		</td>
+    <td width="7%" >
+		<form action="." method="post" id="markdone-{{parent_task.parent.id}}" class="markdone">
+			{% csrf_token %}
+		<div>
+            {% if parent_task.overdue %}
+		<input type="checkbox" name="markundone_check" value="{{parent_task.overdue}}" checked="checked"  disabled="disabled"  />
+
+            {% else %}
+		<input type="checkbox" name="markdone" value="{{parent_task.overdue}}"  disabled="disabled"/>
+            {% endif %}
+		</div>
+    </form>
+		</td>
+	
+  </tr>
+	
+	            <tr class="taskrowdetail">
+                <td>Actual start date</td>
+                <td>
+								{% if parent_task.parent.actual_start_date %}
+								{{parent_task.parent.actual_start_date|date}}
+								{% else %}
+								No date specified
+								{% endif %}
+								
+								</td>
+            </tr>
+            <tr class="taskrowdetail">
+                <td>Actual end date</td>
+                <td>
+								{% if parent_task.parent.actual_end_date %}
+								{{parent_task.parent.actual_end_date|date}}
+								{% else %}
+								No date specified
+								{% endif %}
+								
+								</td>
+            </tr>
+{%if parent_task.sub %}
+	{% for sub_task in parent_task.sub %}
+		{% include 'project/subtaskrow.html' %}
+  	{% endfor %}
+{% endif %}

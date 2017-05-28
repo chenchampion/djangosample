@@ -1,0 +1,16 @@
+# PyTest for running the tests.
+django-haystack==2.5.1
+django-treebeard==4.1.0
+sorl-thumbnail==12.3
+django_tables2
+phonenumbers==8.2.0
+Unidecode==0.4.19
+django-environ==0.4.1
+Pillow==3.2.0
+django-sortable-listview==0.41
+Whoosh==2.7.4
+purl==1.3
+django-extra-views==0.6.4
+django-floppyforms==1.7.0
+simplejson==3.10.0
+django-widget-tweaks==1.4.1

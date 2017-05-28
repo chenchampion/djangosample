@@ -1,0 +1,36 @@
+{% extends 'dashboard/events_index.html' %}
+{% load currency_filters %}
+{% load i18n %}
+
+{% block graph_body %}
+    <div id="order_graph">
+        <div class="bar-caption">
+            <h1>
+                <a href="{% url 'dashboard:dashboard-daily-view' prev_day.year prev_day.month prev_day.day %}" title="Last Day">&larr;</a>
+                {{ day|date:"l, N jS Y" }}的日程
+                <a href="{% url 'dashboard:dashboard-daily-view' next_day.year next_day.month next_day.day %}" title="Next Day">&rarr;</a>
+            </h1>
+        </div>
+        <table class="calendar">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Main Room</th>
+                    <th>Private 2</th>
+                    <th>Private 3</th>
+                    <th colspan="4">Private 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tm,cells in timeslots %}
+                <tr>
+                    <th><a href="{% url 'swingtime-add-event' %}?dtstart={{ tm.isoformat }}">{{ tm|date:"P" }}</a></th>
+                    {% for cell in cells %}
+                    <td{% if cell.event_class %} class="{{cell.event_class}}"{% endif %}>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

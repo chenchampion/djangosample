@@ -1,0 +1,67 @@
+{% extends 'dashboard/events_index.html' %}
+{% load currency_filters %}
+{% load i18n %}
+
+{% block graph_body %}
+    <div id="order_graph">
+        <div class="bar-caption">
+            <h1>
+                <a href="{% url 'dashboard:dashboard-yearly-view' last_year %}" title="Last Year">&larr;</a>
+                {{ year }}年的日程
+                <a href="{% url 'dashboard:dashboard-yearly-view' next_year %}" title="Next Year">&rarr;</a>
+            </h1>
+        </div>
+        {% if by_month or by_month_project%}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Title</th>
+                        <th>Day</th>
+                        <th>Start</th>
+                        <th>End</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for dt,occurrences in by_month %}
+                <tr class="month-divider">
+                    <th rowspan="{{ occurrences|length }}">
+                        <a href="{% url 'swingtime-monthly-view' dt.year dt.month %}">
+                            {{ dt|date:"F" }}</a>
+                    </th>
+                    {% for o in occurrences %}
+                    <td><a href="{{ o.get_absolute_url }}">{{ o.title }}</a></td>
+                    <td>{{ o.start_time|date:"M jS - l" }}</td>
+                    <td>{{ o.start_time|date:"P" }}</td>
+                    <td>{{ o.end_time|date:"P" }}</td>
+                </tr>
+                    {% if not forloop.last %}
+                <tr>
+                    {% endif %}
+                    {% endfor %}
+                {% endfor %}
+
+                {% for dt,occurrences in by_month_project %}
+                <tr class="month-divider">
+                    <th rowspan="{{ occurrences|length }}">
+                        <a href="{% url 'swingtime-monthly-view' dt.year dt.month %}">
+                            {{ dt|date:"F" }}</a>
+                    </th>
+                    {% for o in occurrences %}
+                    <td><a href="{{ o.get_absolute_url }}">{{ o.name }}</a></td>
+                    <td>{{ o.start_date|date:"M jS - l" }}</td>
+                    <td>{{ o.start_date }}</td>
+                    <td>{{ o.end_date }}</td>
+                </tr>
+                    {% if not forloop.last %}
+                <tr>
+                    {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>没有查询到{{ year }}的日程</p>
+        {% endif %}
+    </div>
+{% endblock %}

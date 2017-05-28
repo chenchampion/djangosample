@@ -1,0 +1,22 @@
+{% extends 'dashboard/events_index.html' %}
+{% load currency_filters %}
+{% load i18n %}
+
+{% block graph_body %}
+    <div id="order_graph">
+        <div class="bar-caption">
+            <h1>
+                您的所有日程列表
+            </h1>
+        </div>
+        <ul>{% for e in events %}
+            <li><a href="{{ e.get_absolute_url }}">{{ e }}</a></li>
+        {% endfor %}</ul>
+
+        <ul>
+            {% for sub in subs %}
+            <li><a href="{{sub.project.get_absolute_url}}">{{sub.project.name}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'project/base.html' %}
+{% load i18n %}
+{% load currency_filters %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+    </li>
+    <li>
+        <a href="{% url 'dashboard:project-index' %}">项目主页</a>
+    </li>
+    <li>
+        <a href="{{project.get_absolute_url}}">项目详细</a>
+    </li>
+    <li><a href="{{task.get_absolute_url}}">任务详细</a></li>
+    <li class="active">连接一个订单</li>
+</ul>
+{% endblock %}
+{% block headertext %}
+    {% trans "Link an existing user" %}
+{% endblock %}
+
+{% block dashboard_content %}
+    {% block users_form %}
+        {% if orders or searchform.is_bound %}
+            <div class="well">
+                <h2>{% trans "Orders Filter" %}</h2>
+                <form action="." method="get" class="form-horizontal">
+                    {% include "partials/form_fields.html" with form=searchform style='horizontal' %}
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-sm-8">
+                            <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Filtering...' %}">{% trans 'Filter results' %}</button>
+                            <a href="{% url 'customer:order-list' %}" class="btn btn-default">{% trans 'Reset' %}</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+    {% endblock %}
+
+        {% if orders %}
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbltitle">
+                            <tr>
+                                <td width="15%">{% trans "Order number" %}</td>
+                                <td width="15%">{% trans 'Product' %}</td>
+                                <td width="15%">{% trans "Total inc tax" %}</td>
+                                <td width="30%">{% trans "Date submitted" %}</td>
+                                <td width="25%">&nbsp;</td>
+                            </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl">
+                    <tbody>
+                        {% for order in orders %}
+                                <tr>
+                                    <td width="15%"><a href="{% url 'customer:order' order_number=order.number %}">{{ order.number }}</a></td>
+                                    <td width="15%">
+                                        {% for line in order.lines.all %}
+                                        {% with product=line.product %}
+                                            {% if product %}
+                                                <a href="{{ product.get_absolute_url }}">{{ line.description }}</a>
+                                            {% endif %}
+                                        {% endwith %}
+                                        {% endfor %}
+                                    </td>
+                                    <td width="15%">{{ order.total_incl_tax|currency:order.currency }}</td>
+                                    <td width="30%">
+                                       {{ order.date_placed }}
+                                    </td>
+                                    <td width="25%">
+                                        {% if order == task.order %}
+                                            <form action="{% url 'dashboard:task-order-unlink' task_pk=task.id order_pk=order.id %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'UnLinking...' %}">取消连接</button>
+                                            </form>
+                                        {% else %}
+                                            <form action="{% url 'dashboard:task-order-link' task_pk=task.id order_pk=order.id %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Linking...' %}">连接订单</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% include "dashboard/partials/pagination.html" %}
+        {% else %}
+            {% trans "No orders found." %}
+        {% endif %}
+{% endblock dashboard_content %}

@@ -1,0 +1,75 @@
+{% extends 'dashboard/layout.html' %}
+
+
+{% block header %}
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>
+{% block title %}
+Dash Bard
+{% endblock %}
+</title>
+
+<script language="JavaScript" type="text/javascript" src="/static/js/jquery.js">
+<!--
+
+//-->
+</script>
+<script language="JavaScript" type="text/javascript" src="/static/js/jquery.validate.js">
+<!--
+
+//-->
+</script>
+<script language="JavaScript" type="text/javascript" src="/static/js/jquery.validate.js">
+<!--
+
+//-->
+</script>
+<script language="JavaScript" type="text/javascript" src="/static/js/ui.datepicker.js">
+<!--
+
+//-->
+</script>
+
+<script language="JavaScript" type="text/javascript" src="/static/js/jquery.dimensions.js">
+<!--
+
+//-->
+</script>
+
+<script language="JavaScript" type="text/javascript" src="/static/js/ui.accordion.js">
+<!--
+
+//-->
+</script>
+<script language="JavaScript" type="text/javascript" src="/static/js/prajact.js">
+<!--
+
+//-->
+</script>
+
+
+{% block jqueryarea %}
+{% endblock %}
+
+
+{% block feeds %}
+    <link rel="alternate" type="application/rss+xml" title="{{project.name}} logs RSS feeds" href="/feeds/project/{{project.shortname}}/" />
+{% endblock %}
+
+<link href="/static/style.css" type="text/css" rel="stylesheet" />
+<link href="/static/css/flora.datepicker.css" type="text/css" rel="stylesheet" />
+</head>
+{% endblock %}
+
+{% block dashboard_content %}
+<div id="rightcolumn">
+		{% block sidebar %}
+		<h3>Meta</h3>
+
+ as <a href="#">RSS feeds</a></p>
+
+
+		{% endblock sidebar %}
+		</div><!-- End rightcolumn -->
+{% endblock %}

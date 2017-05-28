@@ -1,0 +1,112 @@
+{% extends 'dashboard/layout.html' %}
+{% load sorting_tags %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "Investors" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li class="active">{% trans "Investors" %}</li>
+    </ul>
+{% endblock %}
+
+{% block header %}
+    {% if current_user and current_user.is_staff %}
+    <div class="page-header">
+        <a href="{% url 'dashboard:investor-create' %}" class="btn btn-lg btn-primary pull-right"><i class="icon-plus"></i> {% trans "Create new investor" %}</a>
+        <h1>{% trans "Investors" %}</h1>
+    </div>
+    {% endif %}
+{% endblock header %}
+
+{% block dashboard_content %}
+    {% if current_user and current_user.is_staff %}
+    <div class="well">
+        <form action="." method="get" class="form-inline">
+            {% include 'dashboard/partials/form_fields_inline.html' with form=form %}
+            <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Searching...' %}">{% trans "Search" %}</button>
+            {% if is_filtered %}
+                <a class="btn btn-default" href="{% url 'dashboard:investor-list' %}" >{% trans "Reset" %}</a>
+            {% endif %}
+        </form>
+    </div>
+    {% endif %}
+
+    <form action="." method="post" class="order_table">
+        {% csrf_token %}
+        <table class="table table-striped table-bordered">
+            <caption>
+                <i class="icon-briefcase icon-large"></i>{{ queryset_description }}
+            </caption>
+            {% if investors %}
+                <tr>
+                    <th>{% anchor 'name' _('Name') %}</th>
+                    <th>{% trans 'Users' %}</th>
+                    <th>{% trans 'Addresses' %}</th>
+                    <th>&nbsp;</th>
+                </tr>
+                {% for investor in investors %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'dashboard:investor-manage' pk=investor.pk %}">{{ investor.name }}</a>
+                        </td>
+                        <td>
+                            {% with users=investor.users.all %}
+                                {% if users %}
+                                    <ul>
+                                        {% for user in users %}
+                                            <li>
+                                                <a href="{% url 'dashboard:investor-user-update' investor_pk=investor.pk user_pk=user.id %}" title="{% trans "Edit the user's details" %}">
+                                                    {{ user.get_full_name|default:user.email }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    {% trans 'No users associated.' %}
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td>
+                            {% with addresses=investor.addresses.all %}
+                            {% if addresses %}
+                                <ul>
+                                    {% for address in addresses %}
+                                        <li>{{ address.summary }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                {% trans 'No address associated.' %}
+                            {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td>
+                            <div class="btn-toolbar">
+                                <div class="btn-group">
+                                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+                                        {% trans "Actions" %}
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right">
+                                        <li><a href="{% url 'dashboard:investor-manage' pk=investor.pk %}">{% trans "Manage investor and users" %}</a></li>
+                                        <li><a href="{% url 'dashboard:investor-delete' pk=investor.pk %}">{% trans "Delete investor" %}</a></li>
+                                        <li><a href="{% url 'dashboard:investor-user-select' investor_pk=investor.pk %}">{% trans "Link an existing user" %}</a></li>
+                                        <li><a href="{% url 'dashboard:investor-user-create' investor_pk=investor.pk %}">{% trans "Link a new user" %}</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td>{% trans "No investors found." %}</td></tr>
+            {% endif %}
+        </table>
+        {% include "dashboard/partials/pagination.html" %}
+    </form>
+{% endblock dashboard_content %}

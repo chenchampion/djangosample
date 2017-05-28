@@ -1,0 +1,39 @@
+{% extends 'dashboard/layout.html' %}
+{% load sorting_tags %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+{% load currency_filters %}
+
+{% block body_class %}{{ block.super }} create-page companys{% endblock %}
+{% block title %}
+    {{ company.name }} | {% trans "Companys" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li>
+            <a href="{% url 'dashboard:company-list' %}">{% trans "Companys" %}</a>
+        </li>
+        <li class="active">{{ company.name }}</li>
+    </ul>
+{% endblock %}
+
+{% block headertext %}
+    {{ company.name }}
+{% endblock %}
+
+{% block dashboard_content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-header">
+                <h2>{{ title }}</h2>
+            </div>
+            {% include "dashboard/partials/form.html" with form=form class="well" %}
+        </div>
+    </div>
+
+{% endblock dashboard_content %}

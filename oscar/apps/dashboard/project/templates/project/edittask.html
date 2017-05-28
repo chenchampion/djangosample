@@ -1,0 +1,58 @@
+{% extends 'project/base.html' %}
+
+{% load i18n %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+    </li>
+    <li>
+        <a href="{% url 'dashboard:project-index' %}">项目主页</a>
+    </li>
+    <li>
+        <a href="{{project.get_absolute_url}}">项目详细</a>
+    </li>
+	<li>
+        <a href="{{task.get_absolute_url}}">任务详细</a>
+    </li>
+    <li class="active">编辑任务</li>
+</ul>
+{% endblock %}
+
+{% block title %}
+{{block.super}} - Edit {{task.name}}
+{% endblock %}
+
+
+{% block innercontent %}
+	 <div class="genericform">
+	 			<h3>Editing {{task.name}}</h3>
+		<div class="createcontent">
+    <form action="." method="post">
+    	{% csrf_token %}
+        {{editform.as_p}}
+        <input type="submit" name="edit" value ="Edit Task" class="submitbutton" />
+			</fieldset>
+    </form>
+		</div>
+		</div>
+{% endblock %}
+
+{% block sidebar %}
+
+
+<h3>
+    Meta
+</h3>
+	<p class="sideblurb">You are editing {{task.name}}.</p>
+	<ul>
+   <li><a href="{{task.get_absolute_url}}">Details</a></li>
+  </ul>
+
+<h3>
+    Older Versions
+</h3>
+{% include 'project/taskversions.html' %}
+       
+{% endblock %}

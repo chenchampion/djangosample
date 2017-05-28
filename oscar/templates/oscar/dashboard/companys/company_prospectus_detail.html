@@ -1,0 +1,158 @@
+{% extends 'dashboard/layout.html' %}
+{% load category_tags %}
+{% load i18n %}
+
+{% block body_class %}{{ block.super }} create-page company{% endblock %}
+
+{% block title %}
+    {{ title }} | {% trans "Companys" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li>
+            <a href="{% url 'dashboard:company-list' %}">{% trans "Companys" %}</a>
+        </li>
+        <li>
+            <a href="{% url 'dashboard:company-manage' pk=company_pk%}">{% trans "Companys Manage" %}</a>
+        </li>
+        <li class="active">{{ title }}</li>
+    </ul>
+{% endblock %}
+
+{% block dashboard_content %}
+    <h2>招股说明</h2>
+
+    {% if prospectus %}
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>招股份额</th>
+                <th>总股本</th>
+                <th>{% trans "Date submitted" %}</th>
+            </tr>
+
+            <tr>
+                <td>{{ prospectus.title }}</td>
+                <td>{{ prospectus.status }}</td>
+                <th>{{ prospectus.fundraising_sclae }}</th>
+                <th>{{ prospectus.total_share_capital }}</th>
+                <td>{{ prospectus.date_created }}</td>
+            </tr>
+        </table>
+    {% endif %}
+
+    {% if is_investor %}
+        <div class="page-header">
+            {% if not investments %}
+                <a href="{% url 'dashboard:investment-create' company_pk=company_pk pk=prospectus.pk%}" class="btn btn-lg btn-primary pull-right"><i class="icon-plus"></i>创建投资申请</a>
+            {% endif %}
+            <h2>投资申请</h2>
+        </div>
+        {% if investments %}
+            我的投资申请
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>招股说明名称</th>
+                <th>我的意愿额度</th>
+                <th>状态</th>
+                <th>{% trans "Date submitted" %}</th>
+            </tr>
+            {% for investment in investments %}
+            <tr>
+                <td>{{ investment.prospectus.title }}</td>
+                <td>{{ investment.amount }}</td>
+                <th>{{ investment.status }}</th>
+                <th>{{ investment.date_created }}</th>
+            </tr>
+            {% endfor %}
+
+        </table>
+        {% else %}
+            尚未申请投资
+        {% endif %}
+    {% else %}
+        <h2>投资申请</h2>
+        {% for investment, comments in comments_list %}
+        <h2>{{investment.investor.name}}的投资申请</h2>
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>投资意愿额度</th>
+                <th>状态</th>
+                <th>{% trans "Date submitted" %}</th>
+                <th></th>
+            </tr>
+
+            <tr>
+                <td>{{ investment.amount }}</td>
+                <th>{{ investment.status }}</th>
+                <th>{{ investment.date_created }}</th>
+                        <td>
+                            <div class="btn-toolbar">
+                                <div class="btn-group">
+                                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+                                        {% trans "Actions" %}
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right">
+                                        <li><a href=#>Accept</a></li>
+                                        <li><a href=#>Reject</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+            </tr>
+        </table>
+        <div class="page-header">
+            <a href="{% url 'dashboard:investmentcomments-create' company_pk=company_pk prospectus_pk=prospectus.pk pk=investment.pk%}" class="btn btn-lg btn-primary pull-right"><i class="icon-plus"></i>添加一个说明</a>
+            <h3>投资说明</h3>
+        </div>
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>用户</th>
+                <th>时间</th>
+                <th>留言内容</th>
+            </tr>
+            {% for comment in comments %}
+            <tr>
+                <td>{{ comment.user }}</td>
+                <td>{{ comment.date_created }}</td>
+                <th>{{ comment.comment }}</th>
+
+            </tr>
+            {% endfor %}
+        </table>
+        {% endfor %}
+    {% endif %}
+
+    {% block comments %}
+    {% if is_investor and investments %}
+    {% for investment in investments %}
+        <div class="page-header">
+            <a href="{% url 'dashboard:investmentcomments-create' company_pk=company_pk prospectus_pk=prospectus.pk pk=investment.pk%}" class="btn btn-lg btn-primary pull-right"><i class="icon-plus"></i>添加一个说明</a>
+            <h3>投资说明</h3>
+        </div>
+        {% if investment_comments %}
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>用户</th>
+                <th>时间</th>
+                <th>留言内容</th>
+            </tr>
+            {% for comment in investment_comments %}
+            <tr>
+                <td>{{ comment.user }}</td>
+                <td>{{ comment.date_created }}</td>
+                <th>{{ comment.comment }}</th>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endblock comments %}
+{% endblock dashboard_content %}

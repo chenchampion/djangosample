@@ -1,0 +1,269 @@
+{% load i18n %}
+{% load staticfiles %}
+{% load category_tags %}
+{% load dashboard_tags %}
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="{{ LANGUAGE_CODE|default:"en-gb" }}" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="{{ LANGUAGE_CODE|default:"en-gb" }}" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="{{ LANGUAGE_CODE|default:"en-gb" }}" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="{{ LANGUAGE_CODE|default:"en-gb" }}" class="no-js"> <!--<![endif]-->
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<meta name="created" content="{% now "jS M Y h:i" %}" />
+	<meta name="description" content="{% block description %}{% endblock %}" />
+	<meta name="viewport" content="{% block viewport %}width=device-width{% endblock %}" />
+	<meta name="robots" content="NOARCHIVE,NOCACHE" />
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+	<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	{% block favicon %}
+		<link rel="shortcut icon" href="{% static "oscar/favicon.ico" %}" />
+	{% endblock %}
+	{# Block where global CSS will go. #}
+	{% block styles %}{% endblock %}
+
+	{# Additional CSS - specific to certain pages #}
+	{% block extrastyles %}{% endblock %}
+
+	{% block extrahead %}{% endblock %}
+
+	{% block tracking %}
+		{# Default to using Google analytics #}
+		{% include "partials/google_analytics.html" %}
+	{% endblock %}
+
+	<title>
+	{% block title %}
+	Dash Bard
+	{% endblock %}
+	</title>
+
+	<script language="JavaScript" type="text/javascript" src="/static/js/jquery.js">
+	<!--
+
+	//-->
+	</script>
+	<script language="JavaScript" type="text/javascript" src="/static/js/jquery.validate.js">
+	<!--
+
+	//-->
+	</script>
+	<script language="JavaScript" type="text/javascript" src="/static/js/jquery.validate.js">
+	<!--
+
+	//-->
+	</script>
+	<script language="JavaScript" type="text/javascript" src="/static/js/ui.datepicker.js">
+	<!--
+
+	//-->
+	</script>
+
+	<script language="JavaScript" type="text/javascript" src="/static/js/jquery.dimensions.js">
+	<!--
+
+	//-->
+	</script>
+
+	<script language="JavaScript" type="text/javascript" src="/static/js/ui.accordion.js">
+	<!--
+
+	//-->
+	</script>
+	<script language="JavaScript" type="text/javascript" src="/static/js/prajact.js">
+	<!--
+
+	//-->
+	</script>
+
+
+	{% block jqueryarea %}
+	{% endblock %}
+
+
+	{% block feeds %}
+		<link rel="alternate" type="application/rss+xml" title="{{project.name}} logs RSS feeds" href="/feeds/project/{{project.shortname}}/" />
+	{% endblock %}
+
+	<link href="/static/style.css" type="text/css" rel="stylesheet" />
+	<link href="/static/css/flora.datepicker.css" type="text/css" rel="stylesheet" />
+
+	<styles>
+		{% if use_less %}
+			<link rel="stylesheet/less" type="text/css" href="{% static "oscar/less/dashboard.less" %}" />
+		{% else %}
+			<link rel="stylesheet" type="text/css" href="{% static "oscar/css/dashboard.css" %}" />
+		{% endif %}
+
+	</styles>
+</head>
+
+
+
+<body>
+
+<div id="container">
+	{# Main content goes in this 'layout' block #}
+	{% block layout %}
+		{% block navbar %}
+		<nav class="navbar navbar-static-top navbar-inverse navbar-accounts">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".nav-accounts">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<span class="navbar-brand">{{ shop_name }}</span>
+				</div>
+				<div class="collapse navbar-collapse nav-accounts">
+					<ul class="nav navbar-nav navbar-right">
+						<li><span>{% trans "Welcome" %} <em>{{ user.get_full_name|default:request.user.email }}</em></span></li>
+						<li><a href="{{ homepage_url }}"><i class="icon-home"></i> {% trans "Return to site" %}</a></li>
+						<li><a href="{% url 'customer:summary' %}"><i class="icon-user"></i> {% trans "Account" %}</a></li>
+						<li><a href="{% url 'dashboard:logout' %}"><i class="icon-signout"></i> {% trans "Log out" %}</a></li>
+					</ul>
+				</div>
+			</div><!-- /navbar-inner -->
+		</nav><!-- /navbar -->
+		{% endblock navbar %}
+
+		{% block dashboard_nav %}
+			{% dashboard_navigation user as nav_items %}
+
+			<nav class="navbar navbar-static-top navbar-inverse navbar-primary">
+				<div class="container-fluid dashboard">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".nav-primary">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+					</div>
+
+					<div class="collapse navbar-collapse nav-primary">
+						<ul class="nav navbar-nav dashboard">
+							{% for item in nav_items %}
+							<li class="dropdown">
+								{% if item.is_heading %}
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+									{% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+									{{ item.label }} <b class="caret"></b>
+								</a>
+								{% else %}
+								<a href="{{ item.url }}">
+									{% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+									{{ item.label }}
+								</a>
+								{% endif %}
+								{% if item.has_children %}
+								<ul class="dropdown-menu">
+									{% for subitem in item.children %}
+									<li>
+										<a href="{{ subitem.url }}">
+										{% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
+										{{ subitem.label }}
+										</a>
+									</li>
+									{% endfor %}
+								</ul>
+								{% endif %}
+							</li>
+							{% endfor %}
+						</ul>
+					</div>
+				</div>
+			</nav>
+		{% endblock %}
+
+		<div class="container-fluid dashboard">
+			{% block breadcrumbs %}
+			<ul class="breadcrumb">
+				<li>
+					<a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+				</li>
+			</ul>
+			{% endblock %}
+
+			<div class="content">
+				{% include 'dashboard/partials/alert_messages.html' %}
+				{% block header %}
+
+				{% endblock %}
+				<div class="page-content">
+					{% block content %}
+						{% block dashboard_content %}{% endblock dashboard_content %}
+					{% endblock content %}
+				</div>
+			</div>
+		</div><!-- /container -->
+	{% endblock %}
+
+
+
+	{% block outercontent %}
+	<div id="content">
+	
+
+	{% block contenttitle %}
+	
+	{% endblock %}
+
+	
+	<div id="contentwrap">
+		<div id="leftcolumn">
+			{% block contents %}
+			<div class="contenttext">
+			
+				<div class="curve"><p></p></div>
+				
+				<div class="tblpad">
+				
+					<div class="textcontent">
+					{%  block innercontent %}
+					{% endblock %}
+					</div><!-- end  textcontent -->
+				
+			
+				</div> <!-- end tblpad -->
+
+			
+			</div><!-- end contenttext -->
+			{% block formsarea %}
+			{% endblock %}
+		
+		{% endblock contents %}	
+		</div><!-- end leftcolumn -->
+		
+		</div><!-- end contentwrap -->
+		
+		<div id="rightcolumn">
+		{% block sidebar %}
+		<h3>Meta</h3>
+		<p class="totalproject">This project has 8 tasks</p>
+		<p>You are viewing logs for :<br />
+Project name<br />
+These are also available<br />
+ as <a href="#">RSS feeds</a></p>
+		
+	
+		{% endblock sidebar %}
+		</div><!-- End rightcolumn -->
+		<br style="clear:both" />
+	</div><!-- end content -->
+	{% endblock outercontent %}
+<div id="footer">
+{% block footer %}
+<p class="footerlink"><a href="#">Home</a> | <a href="#">Contact</a> | <a href="#">Terms</a> | <a href="#">Links</a> | <a href="#">Privacy</a> | <a href="#">Site Map</a></p>
+<p style="margin:0px;">Powered By webfactional .Copyright 2007. webfactional.com</p>
+{% endblock footer %}
+</div><!-- end footer -->
+
+</div><!-- end container -->
+</body>
+
+
+</html>

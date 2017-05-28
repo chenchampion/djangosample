@@ -1,0 +1,38 @@
+{% extends 'dashboard/layout.html' %}
+{% load currency_filters %}
+{% load i18n %}
+{% load staticfiles %}
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+</head>
+
+{% block body_class %}{{ block.super }} events home{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <meta http-equiv="refresh" content="300">
+{% endblock %}
+
+{% block breadcrumbs %}
+{% endblock %}
+
+{% block headertext %}
+日程
+{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="table-header">
+    <i class="icon-signal icon-large"></i>您的日程
+</div>
+
+<div id="order_graph">
+    <div id="app">
+           <vue-event-calendar :demoEvent="[{date: `2017/05/15`,title: 'Title-1'}]"></vue-event-calendar>
+    </div>
+    <script src="{%static "oscar/js/dist/build.js" %}"></script>
+</div>
+
+{% endblock %}
